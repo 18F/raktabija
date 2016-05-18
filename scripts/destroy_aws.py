@@ -6,7 +6,7 @@ import sys
 import boto3
 import pprint
 
-parser = argparse.ArgumentParser(description='Prepare environment.')
+parser = argparse.ArgumentParser(description='Delete all internet gateways, subnets, and unoccupied vpcs in an AWS account. Use with care.')
 parser.add_argument('account', help='Account ID')
 parser.add_argument('--aws-key', dest='aws_key', help='AWS Key')
 parser.add_argument('--aws-secret-key', dest='aws_secret_key', help='AWS Secret Key')
