@@ -8,13 +8,9 @@ resource "aws_s3_bucket" "terraform_state_bucket" {
     }
 }
 
-resource "terraform_remote_state" "terraform_state" {
-    backend = "s3"
-    config {
-        bucket = "${aws_s3_bucket.terraform_state_bucket.id}"
-        key = "network/terraform.tfstate"
-        region = "us-east-1"
-    }
+resource "aws_key_pair" "raktabija" {
+  key_name = "raktabija-key" 
+  public_key = "${var.public_key}"
 }
 
 resource "aws_vpc" "concourse" {
@@ -25,18 +21,22 @@ resource "aws_subnet" "concourse_subnet_1" {
     vpc_id = "${aws_vpc.concourse.id}"
     availability_zone = "us-east-1a"
     cidr_block = "10.0.0.0/25"
+    map_public_ip_on_launch = false
 }
 
 resource "aws_subnet" "concourse_subnet_2" {
     vpc_id = "${aws_vpc.concourse.id}"
     availability_zone = "us-east-1c"
     cidr_block = "10.0.0.128/25"
+    map_public_ip_on_launch = false
 }
 
 resource "aws_launch_configuration" "concourse_autoscale_conf" {
     image_id = "ami-50759d3d"
+    key_name = "${aws_key_pair.raktabija.id}"
     instance_type = "t2.small"
-
+    security_groups = ["${aws_security_group.allow_bastion.id}"]
+    associate_public_ip_address = true
     lifecycle {
       create_before_destroy = true
     }
@@ -46,15 +46,34 @@ resource "aws_internet_gateway" "councourse_gw" {
   vpc_id = "${aws_vpc.concourse.id}"
 }
 
-resource "aws_security_group" "allow_https" {
-  name = "allow_https"
-  description = "Allow all inbound https"
+resource "aws_security_group" "allow_bastion" {
+  name = "allow_bastion"
+  description = "Allow inbound ssh, ping and http"
   vpc_id = "${aws_vpc.concourse.id}"
+
   ingress {
-      from_port = 443
-      to_port = 443
-      protocol = "tcp"
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+      from_port = 8
+      to_port = 0
+      protocol = "icmp"
       cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags {
@@ -63,7 +82,7 @@ resource "aws_security_group" "allow_https" {
 }
 
 resource "aws_elb" "concourse_elb" {
- depends_on = ["aws_internet_gateway.concourse_gw"]
+# depends_on = ["${aws_internet_gateway.concourse_gw.id}"]
   name = "foobar-terraform-elb"
   subnets = ["${aws_subnet.concourse_subnet_1.id}", "${aws_subnet.concourse_subnet_2.id}"]
 
@@ -79,7 +98,7 @@ resource "aws_elb" "concourse_elb" {
     healthy_threshold = 2
     unhealthy_threshold = 2
     timeout = 3
-    target = "HTTP:8080/"
+    target = "HTTP:80/"
     interval = 30
   }
 
