@@ -32,10 +32,50 @@ resource "aws_subnet" "concourse_subnet_2" {
     map_public_ip_on_launch = false
 }
 
+resource "aws_iam_role" "ec2_role" {
+    name = "ec2_role"
+    assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": { "Service": "ec2.amazonaws.com" },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "power_user_policy" {
+    name = "power_user_policy"
+    role = "${aws_iam_role.ec2_role.id}"
+    policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "NotAction": "iam:*",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_instance_profile" "concourse_profile" {
+    name = "concourse_profile"
+    roles = ["${aws_iam_role.ec2_role.name}"]
+}
+
 resource "aws_launch_configuration" "concourse_autoscale_conf" {
     image_id = "ami-50759d3d"
     key_name = "${aws_key_pair.raktabija.id}"
     instance_type = "t2.small"
+    iam_instance_profile = "${aws_iam_instance_profile.concourse_profile.arn}"
     security_groups = ["${aws_security_group.allow_bastion.id}"]
     associate_public_ip_address = true
     lifecycle {
@@ -126,7 +166,6 @@ resource "aws_elb" "concourse_elb" {
   connection_draining = true
   connection_draining_timeout = 400
 }
-
 
 resource "aws_autoscaling_group" "concourse_autoscale" {
   availability_zones = ["us-east-1a", "us-east-1c"]
