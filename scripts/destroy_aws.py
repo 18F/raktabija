@@ -24,6 +24,17 @@ pp = pprint.PrettyPrinter(indent=4)
 for region in regions:
     print('Deleting resources in region' + region)
     ec2client = session.client('ec2', region)
+
+    instances = []
+    reservations = ec2client.describe_instances(Filters=[{'Name':'instance-state-name','Values':['running']}])
+    for reservation in reservations['Reservations']:
+        for instance in reservation['Instances']:
+            pp.pprint('deleting instance: '+instance['InstanceId'])
+            instances.append(instance['InstanceId'])
+
+    if instances:
+        ec2client.terminate_instances(InstanceIds=instances)
+    
     igs = ec2client.describe_internet_gateways()
     pp.pprint(igs)
     for igId in igs['InternetGateways']:
@@ -35,7 +46,7 @@ for region in regions:
     pp.pprint(subnets)
     for subnetId in subnets['Subnets']:
         ec2client.delete_subnet(SubnetId=subnetId['SubnetId'])
-                
+            
     vpcs = ec2client.describe_vpcs()
     pp.pprint(vpcs)
     for vpcId in vpcs['Vpcs']:

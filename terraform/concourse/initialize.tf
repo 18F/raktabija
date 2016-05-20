@@ -1,4 +1,5 @@
 provider "aws" {}
+variable "public_key" {}
 
 resource "aws_s3_bucket" "terraform_state_bucket" {
     bucket = "tts_prod_terraform_state"
@@ -42,8 +43,26 @@ resource "aws_launch_configuration" "concourse_autoscale_conf" {
     }
 }
 
-resource "aws_internet_gateway" "councourse_gw" {
+resource "aws_internet_gateway" "concourse_gw" {
   vpc_id = "${aws_vpc.concourse.id}"
+}
+
+resource "aws_route_table" "concourse_route_table" {
+    vpc_id = "${aws_vpc.concourse.id}"
+    route {
+        cidr_block = "0.0.0.0/0"
+        gateway_id = "${aws_internet_gateway.concourse_gw.id}"
+    }
+}
+
+resource "aws_route_table_association" "concourse_route_subnet_1" {
+    subnet_id = "${aws_subnet.concourse_subnet_1.id}"
+    route_table_id = "${aws_route_table.concourse_route_table.id}"
+}
+
+resource "aws_route_table_association" "concourse_route_subnet_2" {
+    subnet_id = "${aws_subnet.concourse_subnet_2.id}"
+    route_table_id = "${aws_route_table.concourse_route_table.id}"
 }
 
 resource "aws_security_group" "allow_bastion" {
@@ -83,8 +102,9 @@ resource "aws_security_group" "allow_bastion" {
 
 resource "aws_elb" "concourse_elb" {
 # depends_on = ["${aws_internet_gateway.concourse_gw.id}"]
-  name = "foobar-terraform-elb"
+  name = "terraform-concourse-elb"
   subnets = ["${aws_subnet.concourse_subnet_1.id}", "${aws_subnet.concourse_subnet_2.id}"]
+  security_groups = ["${aws_security_group.allow_bastion.id}"]
 
   listener {
     instance_port = 80
@@ -103,7 +123,6 @@ resource "aws_elb" "concourse_elb" {
   }
 
   cross_zone_load_balancing = true
-  idle_timeout = 400
   connection_draining = true
   connection_draining_timeout = 400
 }
@@ -114,7 +133,7 @@ resource "aws_autoscaling_group" "concourse_autoscale" {
   max_size = 1
   min_size = 1
   health_check_grace_period = 300
-  health_check_type = "ELB"
+  health_check_type = "EC2"
   desired_capacity = 1
   vpc_zone_identifier = ["${aws_subnet.concourse_subnet_1.id}", "${aws_subnet.concourse_subnet_2.id}"]
   launch_configuration = "${aws_launch_configuration.concourse_autoscale_conf.id}"
