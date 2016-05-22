@@ -1,6 +1,5 @@
 package 'linux-generic-lts-vivid'
 package 'postgresql'
-package 'terraform'
 
 db_password = shell_out("openssl rand -base64 32").stdout.strip
 
