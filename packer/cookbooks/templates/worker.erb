@@ -1,0 +1,14 @@
+#!/bin/bash
+
+BASE_DIR="/opt/concourse"
+
+WORK_DIR="/mnt/worker"
+
+mkdir -p $WORK_DIR
+
+$BASE_DIR/bin/concourse worker \
+    --work-dir $WORK_DIR \
+    --tsa-host 127.0.0.1 \
+    --tsa-public-key $BASE_DIR/etc/host_key.pub \
+    --tsa-worker-private-key $BASE_DIR/etc/worker_key \
+| tee /var/log/concourse-worker.log

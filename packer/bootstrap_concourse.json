@@ -1,0 +1,28 @@
+{
+  "variables": {
+    "aws_region": "us-east-1",
+    "source_ami": "ami-50759d3d",
+    "subnet_id": "",
+    "vpc_id": "",
+    "ami_name_postfix": ""
+  },
+
+  "builders": [{
+    "type": "amazon-ebs",
+    "region": "{{user `aws_region`}}",
+    "source_ami": "{{user `source_ami`}}",
+    "instance_type": "t2.small",
+    "ssh_username": "ubuntu",
+    "subnet_id": "{{user `subnet_id`}}",
+    "vpc_id": "{{user `vpc_id`}}",
+    "ami_name": "tts_concourse_bootstrap_{{user `ami_name_postfix`}}"
+  }],
+
+  "provisioners": [
+    {
+      "type": "chef-solo",
+      "cookbook_paths": ["cookbooks"],
+      "run_list": ["concourse"]
+    }
+  ]
+}

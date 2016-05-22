@@ -1,5 +1,6 @@
 provider "aws" {}
 variable "public_key" {}
+variable "ami_name" {}
 
 resource "aws_s3_bucket" "terraform_state_bucket" {
     bucket = "tts_prod_terraform_state"
@@ -72,7 +73,7 @@ resource "aws_iam_instance_profile" "concourse_profile" {
 }
 
 resource "aws_launch_configuration" "concourse_autoscale_conf" {
-    image_id = "ami-50759d3d"
+    image_id = "${var.ami_name}"
     key_name = "${aws_key_pair.raktabija.id}"
     instance_type = "t2.small"
     iam_instance_profile = "${aws_iam_instance_profile.concourse_profile.arn}"

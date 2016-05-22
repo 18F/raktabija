@@ -1,0 +1,17 @@
+#!/bin/bash
+
+BASE_DIR="/opt/concourse"
+
+USERNAME=$(curl http://169.254.169.254/latest/user-data | $BASE_DIR/bin/extract_yaml_key username ci)
+PASSWORD=$(curl http://169.254.169.254/latest/user-data | $BASE_DIR/bin/extract_yaml_key password walt)
+
+$BASE_DIR/bin/concourse web \
+    --bind-port 80 \
+    --basic-auth-username $USERNAME \
+    --basic-auth-password $PASSWORD \
+    --session-signing-key $BASE_DIR/etc/session_signing_key \
+    --tsa-host-key $BASE_DIR/etc/host_key \
+    --tsa-authorized-keys $BASE_DIR/etc/worker_key.pub \
+    --postgres-data-source='postgres://atc:<%= @db_password %>@127.0.0.1:5432/atc?sslmode=disable' \
+    --external-url http://`curl http://169.254.169.254/latest/meta-data/public-hostname` \
+| tee /var/log/concourse-web.log
