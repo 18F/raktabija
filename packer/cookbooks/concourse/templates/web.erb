@@ -12,6 +12,6 @@ $BASE_DIR/bin/concourse web \
     --session-signing-key $BASE_DIR/etc/session_signing_key \
     --tsa-host-key $BASE_DIR/etc/host_key \
     --tsa-authorized-keys $BASE_DIR/etc/worker_key.pub \
-    --postgres-data-source='postgres://atc:<%= @db_password %>@127.0.0.1:5432/atc?sslmode=disable' \
+    --postgres-data-source postgres://atc:<%= @db_password %>@127.0.0.1:5432/atc?sslmode=disable \
     --external-url http://`curl http://169.254.169.254/latest/meta-data/public-hostname` \
 | tee /var/log/concourse-web.log

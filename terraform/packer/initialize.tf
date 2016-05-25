@@ -2,6 +2,8 @@ provider "aws" {
     region = "us-east-1"
 }
 
+variable "environment_name" {}
+
 output "packer_subnet" {
     value="${aws_subnet.packer_subnet.id}"
 }
@@ -11,7 +13,7 @@ output "packer_vpc" {
 }
 
 resource "aws_s3_bucket" "terraform_state_bucket" {
-    bucket = "tts_prod_terraform_packer_state"
+    bucket = "${var.environment_name}_terraform_packer_state"
     acl = "private"
     versioning {
         enabled = true

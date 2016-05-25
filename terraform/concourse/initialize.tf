@@ -2,10 +2,13 @@ provider "aws" {
     region = "us-east-1"
 }
 variable "public_key" {}
+variable "environment_name" {}
 variable "ami_name" {}
+variable "concourse_username" {}
+variable "concourse_password" {}
 
 resource "aws_s3_bucket" "terraform_state_bucket" {
-    bucket = "tts_prod_terraform_state"
+    bucket = "${var.environment_name}_terraform_state"
     acl = "private"
     versioning {
         enabled = true
@@ -84,6 +87,10 @@ resource "aws_launch_configuration" "concourse_autoscale_conf" {
     lifecycle {
       create_before_destroy = true
     }
+    user_data =  <<EOF
+username: ${var.concourse_username}
+password: ${var.concourse_password}
+EOF
 }
 
 resource "aws_internet_gateway" "concourse_gw" {
