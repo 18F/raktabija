@@ -2,18 +2,9 @@ provider "aws" {
     region = "us-east-1"
 }
 variable "public_key" {}
-variable "environment_name" {}
 variable "ami_name" {}
 variable "concourse_username" {}
 variable "concourse_password" {}
-
-resource "aws_s3_bucket" "terraform_state_bucket" {
-    bucket = "${var.environment_name}_terraform_state"
-    acl = "private"
-    versioning {
-        enabled = true
-    }
-}
 
 resource "aws_key_pair" "raktabija" {
   key_name = "raktabija-key" 
@@ -22,6 +13,9 @@ resource "aws_key_pair" "raktabija" {
 
 resource "aws_vpc" "concourse" {
     cidr_block = "10.0.0.0/24"
+    tags {
+    	 Creator = "Terraform"
+    }
 }
 
 resource "aws_subnet" "concourse_subnet_1" {
@@ -29,6 +23,9 @@ resource "aws_subnet" "concourse_subnet_1" {
     availability_zone = "us-east-1a"
     cidr_block = "10.0.0.0/25"
     map_public_ip_on_launch = false
+    tags {
+    	 Creator = "Terraform"
+    }
 }
 
 resource "aws_subnet" "concourse_subnet_2" {
@@ -36,6 +33,9 @@ resource "aws_subnet" "concourse_subnet_2" {
     availability_zone = "us-east-1c"
     cidr_block = "10.0.0.128/25"
     map_public_ip_on_launch = false
+    tags {
+    	 Creator = "Terraform"
+    }
 }
 
 resource "aws_iam_role" "ec2_role" {
@@ -95,6 +95,9 @@ EOF
 
 resource "aws_internet_gateway" "concourse_gw" {
   vpc_id = "${aws_vpc.concourse.id}"
+  tags {
+    Creator = "Terraform"
+  }
 }
 
 resource "aws_route_table" "concourse_route_table" {
@@ -102,6 +105,9 @@ resource "aws_route_table" "concourse_route_table" {
     route {
         cidr_block = "0.0.0.0/0"
         gateway_id = "${aws_internet_gateway.concourse_gw.id}"
+    }
+    tags {
+    	 Creator = "Terraform"
     }
 }
 
@@ -146,7 +152,7 @@ resource "aws_security_group" "allow_bastion" {
   }
 
   tags {
-    Name = "allow_all"
+    	 Creator = "Terraform"
   }
 }
 
@@ -175,6 +181,9 @@ resource "aws_elb" "concourse_elb" {
   cross_zone_load_balancing = true
   connection_draining = true
   connection_draining_timeout = 400
+  tags {
+    Creator = "Terraform"
+  }
 }
 
 resource "aws_autoscaling_group" "concourse_autoscale" {
@@ -187,4 +196,9 @@ resource "aws_autoscaling_group" "concourse_autoscale" {
   vpc_zone_identifier = ["${aws_subnet.concourse_subnet_1.id}", "${aws_subnet.concourse_subnet_2.id}"]
   launch_configuration = "${aws_launch_configuration.concourse_autoscale_conf.id}"
   load_balancers = ["${aws_elb.concourse_elb.id}"]
+  tag {
+    key = "Creator"
+    value = "Terraform"
+    propagate_at_launch = true
+  }
 }

@@ -1,7 +1,7 @@
 {
   "variables": {
     "aws_region": "us-east-1",
-    "source_ami": "ami-50759d3d",
+    "source_ami": "ami-13be557e",
     "subnet_id": "",
     "vpc_id": "",
     "ami_name_postfix": ""
