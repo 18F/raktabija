@@ -16,9 +16,9 @@ terraform apply -var env_name=${ENVIRONMENT_NAME} $ROOT_DIR/terraform/packer
 PACKER_SUBNET=`terraform output packer_subnet`
 PACKER_VPC=`terraform output packer_vpc`
 cd $ROOT_DIR/packer
-packer build -machine-readable -var "vpc_id=${PACKER_VPC}" -var "subnet_id=${PACKER_SUBNET}" -var "ami_name_postfix=${TIMESTAMP}" bootstrap_concourse.json | tee build.log
+packer build -machine-readable -var "vpc_id=$PACKER_VPC" -var "subnet_id=$PACKER_SUBNET" -var "ami_name_postfix=$TIMESTAMP" bootstrap_concourse.json | tee build.log
+[ ${PIPESTATUS[0]} -eq 0 ] || die "Packer failed, exiting"
 $AMI_NAME=`grep 'artifact,0,id' build.log | cut -d, -f6 | cut -d: -f2`
 echo $AMI_NAME
 cd $ROOT_DIR/terraform/concourse
 terraform apply -var ami_name=$AMI_NAME $ROOT_DIR/terraform/concourse
-

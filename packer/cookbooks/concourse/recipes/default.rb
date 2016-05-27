@@ -1,5 +1,7 @@
-package 'linux-generic-lts-vivid'
+package 'linux-generic-lts-xenial'
 package 'postgresql'
+package 'terraform'
+package 'packer'
 
 db_password = shell_out("openssl rand -base64 32").stdout.strip
 
