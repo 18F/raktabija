@@ -1,7 +1,9 @@
-start on runlevel [2345]
+[Unit]
+Description=Concourse worker service
 
-stop on runlevel [016]
+[Service]
+ExecStart=/opt/concourse/bin/concourse-worker
+Restart=on-failure
 
-respawn
-
-exec /opt/concourse/bin/concourse-worker
+[Install]
+WantedBy=multi-user.target

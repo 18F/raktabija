@@ -1,7 +1,7 @@
 package 'linux-generic-lts-xenial'
 package 'postgresql'
-package 'terraform'
-package 'packer'
+#package 'terraform'
+#package 'packer'
 
 db_password = shell_out("openssl rand -base64 32").stdout.strip
 
@@ -9,7 +9,7 @@ concourse_binary_release = shell_out("curl https://api.github.com/repos/concours
 
 service 'concourse-web' do
   action [:stop]
-  only_if { File.exist?("/etc/init/concourse-web.conf") }
+  only_if { File.exist?("/lib/systemd/system/concourse-web.service") }
 end
 
 execute 'drop-atc-database' do
@@ -80,7 +80,7 @@ template '/opt/concourse/bin/concourse-worker' do
   source 'worker.erb'
 end
 
-template '/etc/init/concourse-worker.conf' do
+template '/lib/systemd/system/concourse-worker.service' do
   mode 0644
   source 'worker-init.erb'
 end
@@ -93,7 +93,7 @@ template '/opt/concourse/bin/concourse-web' do
   })
 end
 
-template '/etc/init/concourse-web.conf' do
+template '/lib/systemd/system/concourse-web.service' do
   mode 0644
   source 'web-init.erb'
 end

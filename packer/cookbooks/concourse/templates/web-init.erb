@@ -1,7 +1,9 @@
-start on runlevel [2345]
+[Unit]
+Description=Concourse web server
 
-stop on runlevel [016]
+[Service]
+ExecStart=/opt/concourse/bin/concourse-web
+Restart=on-failure
 
-respawn
-
-exec /opt/concourse/bin/concourse-web
+[Install]
+WantedBy=multi-user.target
