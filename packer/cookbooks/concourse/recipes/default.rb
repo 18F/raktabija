@@ -3,8 +3,7 @@ package 'postgresql'
 #package 'terraform'
 #package 'packer'
 
-db_password = shell_out("openssl rand -base64 32").stdout.strip
-
+db_password = shell_out("tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1").stdout.strip
 concourse_binary_release = shell_out("curl https://api.github.com/repos/concourse/concourse/releases | grep browser_download_url | grep 'linux_amd64' | head -n 1 | cut -d'\"' -f4").stdout.strip
 
 service 'concourse-web' do
