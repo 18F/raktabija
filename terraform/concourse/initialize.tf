@@ -19,6 +19,14 @@ resource "aws_vpc" "concourse" {
     }
 }
 
+resource "aws_s3_bucket" "terraform_state_bucket" {
+    bucket = "${var.env_name}_terraform_state"
+    acl = "private"
+    versioning {
+        enabled = true
+    }
+}
+
 resource "aws_subnet" "concourse_subnet_1" {
     vpc_id = "${aws_vpc.concourse.id}"
     availability_zone = "us-east-1a"
