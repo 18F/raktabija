@@ -1,0 +1,11 @@
+jobs:
+- name: bootstrap-terraform-pipeline
+  plan:
+  - get: cg-provision
+
+resources:
+- name: cg-provision
+  type: git
+  source:
+    uri: https://github.com/18F/raktabija
+    branch: master

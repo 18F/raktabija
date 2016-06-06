@@ -4,6 +4,8 @@ BASE_DIR="/opt/concourse"
 
 WORK_DIR="/mnt/worker"
 
+export RAKTABIJA_ENV=$(curl http://169.254.169.254/latest/user-data | $BASE_DIR/bin/extract_yaml_key env_name)
+
 mkdir -p $WORK_DIR
 
 $BASE_DIR/bin/concourse worker \

@@ -34,7 +34,6 @@ resource "aws_internet_gateway" "packer_gw" {
     }
 }
 
-
 resource "aws_subnet" "packer_subnet" {
     vpc_id = "${aws_vpc.packer.id}"
     availability_zone = "us-east-1a"

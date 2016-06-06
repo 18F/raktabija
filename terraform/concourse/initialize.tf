@@ -5,6 +5,7 @@ variable "public_key" {}
 variable "ami_name" {}
 variable "concourse_username" {}
 variable "concourse_password" {}
+variable "env_name" {}
 
 resource "aws_key_pair" "raktabija" {
   key_name = "raktabija-key" 
@@ -90,6 +91,7 @@ resource "aws_launch_configuration" "concourse_autoscale_conf" {
     user_data =  <<EOF
 username: ${var.concourse_username}
 password: ${var.concourse_password}
+env_name: ${var.env_name}
 EOF
 }
 
@@ -163,7 +165,7 @@ resource "aws_elb" "concourse_elb" {
   security_groups = ["${aws_security_group.allow_bastion.id}"]
 
   listener {
-    instance_port = 80
+    instance_port = 8080
     instance_protocol = "http"
     lb_port = 80
     lb_protocol = "http"
@@ -174,7 +176,7 @@ resource "aws_elb" "concourse_elb" {
     healthy_threshold = 2
     unhealthy_threshold = 2
     timeout = 3
-    target = "HTTP:80/"
+    target = "HTTP:8080/"
     interval = 30
   }
 

@@ -4,9 +4,10 @@ BASE_DIR="/opt/concourse"
 
 USERNAME=$(curl http://169.254.169.254/latest/user-data | $BASE_DIR/bin/extract_yaml_key username ci)
 PASSWORD=$(curl http://169.254.169.254/latest/user-data | $BASE_DIR/bin/extract_yaml_key password walt)
+export RAKTABIJA_ENV=$(curl http://169.254.169.254/latest/user-data | $BASE_DIR/bin/extract_yaml_key env_name)
 
 $BASE_DIR/bin/concourse web \
-    --bind-port 80 \
+    --bind-port 8080 \
     --basic-auth-username $USERNAME \
     --basic-auth-password $PASSWORD \
     --session-signing-key $BASE_DIR/etc/session_signing_key \
