@@ -1,9 +1,0 @@
-[Unit]
-Description=Concourse worker service
-
-[Service]
-ExecStart=/opt/concourse/bin/concourse-worker
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
