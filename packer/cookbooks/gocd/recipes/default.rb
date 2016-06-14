@@ -1,4 +1,4 @@
-package 'linux-generic-lts-xenial'
+#package 'linux-generic-lts-xenial'
 package 'openjdk-8-jdk-headless'
 package 'unzip'
 
@@ -26,7 +26,12 @@ directory '/opt/terraform/bin' do
   action :create
 end
 
-cookbook_file '/opt/concourse/bin/extract_yaml_key' do
+directory '/opt/gocd/bin' do
+  recursive true
+  action :create
+end
+
+cookbook_file '/opt/gocd/bin/extract_yaml_key' do
   source 'extract_yaml_key.py'
   mode 0755
 end

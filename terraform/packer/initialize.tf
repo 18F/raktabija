@@ -5,7 +5,7 @@ provider "aws" {
 variable "env_name" {}
 
 resource "aws_s3_bucket" "terraform_state_bucket" {
-    bucket = "${var.env_name}_terraform_state"
+    bucket = "${var.env_name}_packer_terraform_state"
     acl = "private"
     versioning {
         enabled = true

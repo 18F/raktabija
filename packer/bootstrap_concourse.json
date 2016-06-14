@@ -15,14 +15,14 @@
     "ssh_username": "ubuntu",
     "subnet_id": "{{user `subnet_id`}}",
     "vpc_id": "{{user `vpc_id`}}",
-    "ami_name": "tts_concourse_bootstrap_{{user `ami_name_postfix`}}"
+    "ami_name": "tts_gocd_bootstrap_{{user `ami_name_postfix`}}"
   }],
 
   "provisioners": [
     {
       "type": "chef-solo",
       "cookbook_paths": ["cookbooks"],
-      "run_list": ["concourse"]
+      "run_list": ["gocd"]
     }
   ]
 }

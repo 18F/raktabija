@@ -7,7 +7,20 @@ Raktabija bootstraps a new AWS account with a vpc and autoscaling group containi
 
 In future, support will be added to run Chaos Monkey against the AWS account.
 
-## The origin of the name Raktabija
+# Requirements
+
+You'll need the following tools installed to bootstrap Raktabija:
+
+* [Terraform](https://www.terraform.io/)
+* [Packer](https://www.packer.io/)
+* [AWS CLI](https://aws.amazon.com/cli/)
+* An operating system which runs bash
+
+# Installing Raktabija
+
+To install Raktabija in your AWS account, type `./go.sh <environment name>` at the shell
+
+# The origin of the name Raktabija
 
 The demon Raktabija had a superpower that meant that when a drop of his blood hit the ground, a new duplicate Raktabija would be created. Thus when the goddess Kali fought him, every time she wounded him, multiple new Raktabijas would be created. The goddess Chandika helped Kali kill all the clone Raktabijas and eventually killed Raktabija himself. The Chandika app is designed to help you kill the profusion of unused virtual resources that accumulate in a typical cloud environment.
 

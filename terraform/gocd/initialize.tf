@@ -20,7 +20,7 @@ resource "aws_vpc" "concourse" {
 }
 
 resource "aws_s3_bucket" "terraform_state_bucket" {
-    bucket = "${var.env_name}_terraform_state"
+    bucket = "${var.env_name}_gocd_terraform_state"
     acl = "private"
     versioning {
         enabled = true
