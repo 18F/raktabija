@@ -11,7 +11,7 @@
     "type": "amazon-ebs",
     "region": "{{user `aws_region`}}",
     "source_ami": "{{user `source_ami`}}",
-    "instance_type": "t2.small",
+    "instance_type": "t2.medium",
     "ssh_username": "ubuntu",
     "subnet_id": "{{user `subnet_id`}}",
     "vpc_id": "{{user `vpc_id`}}",
@@ -20,9 +20,20 @@
 
   "provisioners": [
     {
+	"type": "shell",
+	"inline": [
+	    "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done" ]
+    },
+      {
       "type": "chef-solo",
       "cookbook_paths": ["cookbooks"],
       "run_list": ["gocd"]
+      },
+    {
+	"type": "shell",
+	"environment_vars": [ "GOCD_PASSWORD={{user `gocd_password`}}" ],
+	"execute_command" : "{{ .Vars }} sudo -E bash '{{ .Path }}'",
+	"inline": [ "htpasswd -bcs /etc/go/passwd raktabija ${GOCD_PASSWORD}" ]
     }
   ]
 }

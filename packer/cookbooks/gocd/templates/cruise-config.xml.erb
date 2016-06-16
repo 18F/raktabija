@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cruise xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="cruise-config.xsd" schemaVersion="81">
+  <server artifactsdir="artifacts" commandRepositoryLocation="default">
+    <security allowOnlyKnownUsersToLogin="true">
+      <passwordFile path="/etc/go/passwd"/>
+      <roles>
+	<role name="go-admin"/>
+      </roles>
+      <admins>
+	<role>go-admin</role>
+      </admins>
+    </security>
+  </server>
+</cruise>

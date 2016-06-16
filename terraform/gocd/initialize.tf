@@ -3,8 +3,6 @@ provider "aws" {
 }
 variable "public_key" {}
 variable "ami_name" {}
-variable "concourse_username" {}
-variable "concourse_password" {}
 variable "env_name" {}
 
 resource "aws_key_pair" "raktabija" {
@@ -89,7 +87,7 @@ resource "aws_iam_instance_profile" "concourse_profile" {
 resource "aws_launch_configuration" "concourse_autoscale_conf" {
     image_id = "${var.ami_name}"
     key_name = "${aws_key_pair.raktabija.id}"
-    instance_type = "t2.small"
+    instance_type = "t2.medium"
     iam_instance_profile = "${aws_iam_instance_profile.concourse_profile.arn}"
     security_groups = ["${aws_security_group.allow_bastion.id}"]
     associate_public_ip_address = true
@@ -97,8 +95,6 @@ resource "aws_launch_configuration" "concourse_autoscale_conf" {
       create_before_destroy = true
     }
     user_data =  <<EOF
-username: ${var.concourse_username}
-password: ${var.concourse_password}
 env_name: ${var.env_name}
 EOF
 }
