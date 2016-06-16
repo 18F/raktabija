@@ -24,21 +24,22 @@ package 'go-agent'
 
 template '/etc/go/cruise-config.xml' do
   mode 0600
+  owner 'go'
   source 'cruise-config.xml.erb'
 end
 
 service 'go-agent' do
-  action [:enable]
+  action [:enable, :start]
 end
 
 service 'go-server' do
-  action [:enable]
+  action [:enable, :start]
 end
 
 ruby_block "add_env_to_agent" do
   block do
-    file = Chef::Util::FileEdit.new("/usr/share/go-agent/agent.sh")
-    file.insert_line_after_match("CWD=", "export ENVIRONMENT_NAME=\"$(curl http://169.254.169.254/latest/user-data | extract_yaml_key env_name)\"")
+    file = Chef::Util::FileEdit.new("/etc/default/go-agent")
+    file.insert_line_if_no_match("ENVIRONMENT_NAME", "export ENVIRONMENT_NAME=\"$(curl http://169.254.169.254/latest/user-data | extract_yaml_key env_name)\"")
     file.write_file
   end
 end

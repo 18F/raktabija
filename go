@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+USAGE="Usage: go [-a] environment_name"
 
 die () {
     echo >&2 "$@"
@@ -12,12 +13,23 @@ config_s3_terraform()
     terraform remote config -backend=s3 -backend-config="bucket=${1}_${2}_terraform_state" -backend-config="key=network/terraform.tfstate" -backend-config="region=us-east-1"
 }
 
-if [ -z ${ENVIRONMENT_NAME+x} ]; then
-    [ "$#" -eq 1 ] || die "1 argument required, $# provided"
+# Get command line args
+OPTINT=1
+while getopts ":a" opt; do
+    case $opt in
+	a)
+	    CREATEAMI=0
+	    ;;
+	\?) die $USAGE
+	    ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [[ -z ${ENVIRONMENT_NAME+x} ]]; then
+    [[ "$#" -eq 1 ]] || die $USAGE
     ENVIRONMENT_NAME=$1
 fi
-
-#Set up some variables
 ROOT_DIR=`pwd`
 
 #Terraform environment for packer to use to create AMI for Concourse box
@@ -28,7 +40,7 @@ PACKER_VPC=`terraform output packer_vpc`
 
 #Create AMI for Concourse box
 AMI_NAME=`aws ec2 describe-images --owners self --filters Name=tag:Environment,Values=${ENVIRONMENT_NAME} Name=tag:Creator,Values=packer --query 'Images[*].{DATE:CreationDate,ID:ImageId}' --output text | sort -r | cut -f 2 | head -n1`
-if [ -z ${AMI_NAME+x} ]; then
+if -z ${AMI_NAME+x} || $CREATEAMI; then
     export LC_CTYPE=C
     GOCD_PASSWORD=$(tr -cd "[:alnum:]" < /dev/urandom | fold -w30 | head -n1)
     echo "Credentials for Go: username raktabija, password ${GOCD_PASSWORD}"
