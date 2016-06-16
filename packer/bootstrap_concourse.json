@@ -15,7 +15,8 @@
     "ssh_username": "ubuntu",
     "subnet_id": "{{user `subnet_id`}}",
     "vpc_id": "{{user `vpc_id`}}",
-    "ami_name": "tts_gocd_bootstrap_{{user `ami_name_postfix`}}"
+    "ami_name": "{{user `env_name`}}_gocd_{{timestamp}}",
+    "tags": { "Creator" : "packer", "Environment" : "{{user `env_name`}}" }
   }],
 
   "provisioners": [
