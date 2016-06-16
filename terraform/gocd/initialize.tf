@@ -95,7 +95,8 @@ resource "aws_launch_configuration" "gocd_autoscale_conf" {
       create_before_destroy = true
     }
     user_data =  <<EOF
-env_name: ${var.env_name}
+#!/usr/bin/env bash
+echo "$(curl http://169.254.169.254/latest/meta-data/public-ipv4) $(curl http://169.254.169.254/latest/meta-data/hostname | cut -d. -f1)" >> /etc/hosts
 EOF
 }
 

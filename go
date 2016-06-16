@@ -40,7 +40,7 @@ PACKER_VPC=`terraform output packer_vpc`
 
 #Create AMI for Concourse box
 AMI_NAME=`aws ec2 describe-images --owners self --filters Name=tag:Environment,Values=${ENVIRONMENT_NAME} Name=tag:Creator,Values=packer --query 'Images[*].{DATE:CreationDate,ID:ImageId}' --output text | sort -r | cut -f 2 | head -n1`
-if -z ${AMI_NAME+x} || $CREATEAMI; then
+if [[ -z ${AMI_NAME+x} || $CREATEAMI ]]; then
     export LC_CTYPE=C
     GOCD_PASSWORD=$(tr -cd "[:alnum:]" < /dev/urandom | fold -w30 | head -n1)
     echo "Credentials for Go: username raktabija, password ${GOCD_PASSWORD}"
