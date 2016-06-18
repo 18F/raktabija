@@ -1,6 +1,7 @@
 provider "aws" {
     region = "us-east-1"
 }
+
 variable "public_key" {}
 variable "ami_name" {}
 variable "env_name" {}
@@ -89,7 +90,7 @@ resource "aws_launch_configuration" "gocd_autoscale_conf" {
     key_name = "${aws_key_pair.raktabija.id}"
     instance_type = "t2.medium"
     iam_instance_profile = "${aws_iam_instance_profile.gocd_profile.arn}"
-    security_groups = ["${aws_security_group.allow_bastion.id}"]
+    security_groups = ["${aws_security_group.allow_bastion.id}", "${aws_security_group.gocd_instance.id}"]
     associate_public_ip_address = true
     lifecycle {
       create_before_destroy = true
@@ -128,34 +129,64 @@ resource "aws_route_table_association" "gocd_route_subnet_2" {
     route_table_id = "${aws_route_table.gocd_route_table.id}"
 }
 
+resource "aws_security_group" "load_balancer" {
+  name = "load_balancer"
+  description = "Allow inbound https"
+  vpc_id = "${aws_vpc.gocd.id}"
+
+  ingress {
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 8153
+    to_port = 8153
+    protocol = "tcp"
+    cidr_blocks = ["10.0.0.0/24"]
+  }
+
+  tags {
+    	 Creator = "Terraform"
+  }
+}
+
+resource "aws_security_group" "gocd_instance" {
+  name = "gocd_instance"
+  description = "Allow inbound gocd connections"
+  vpc_id = "${aws_vpc.gocd.id}"
+
+  ingress {
+    from_port = 8153
+    to_port = 8153
+    protocol = "tcp"
+    security_groups = [ "${aws_security_group.load_balancer.id}" ]
+  }
+
+  tags {
+    	 Creator = "Terraform"
+  }
+}
+
 resource "aws_security_group" "allow_bastion" {
   name = "allow_bastion"
   description = "Allow inbound ssh, ping and http"
   vpc_id = "${aws_vpc.gocd.id}"
 
   ingress {
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
     from_port = 22
     to_port = 22
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  
   ingress {
       from_port = 8
       to_port = 0
       protocol = "icmp"
       cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags {
@@ -167,12 +198,13 @@ resource "aws_elb" "gocd_elb" {
 # depends_on = ["${aws_internet_gateway.gocd_gw.id}"]
   name = "terraform-gocd-elb"
   subnets = ["${aws_subnet.gocd_subnet_1.id}", "${aws_subnet.gocd_subnet_2.id}"]
-  security_groups = ["${aws_security_group.allow_bastion.id}"]
+  security_groups = ["${aws_security_group.load_balancer.id}"]
 
+  # We should never use this, but it's mandatory to configure at least one listener
   listener {
-    instance_port = 8080
+    instance_port = 8153
     instance_protocol = "http"
-    lb_port = 80
+    lb_port = 8153
     lb_protocol = "http"
 #    ssl_certificate_id = "arn:aws:iam::123456789012:server-certificate/certName"
   }
@@ -181,7 +213,7 @@ resource "aws_elb" "gocd_elb" {
     healthy_threshold = 2
     unhealthy_threshold = 2
     timeout = 3
-    target = "HTTP:8080/"
+    target = "TCP:8153"
     interval = 30
   }
 
@@ -191,6 +223,10 @@ resource "aws_elb" "gocd_elb" {
   tags {
     Creator = "Terraform"
   }
+}
+
+output "elb_dns_name" {
+    value="${aws_elb.gocd_elb.dns_name}"
 }
 
 resource "aws_autoscaling_group" "gocd_autoscale" {

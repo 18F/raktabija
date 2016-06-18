@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-USAGE="Usage: go [-a] environment_name"
+USAGE="Usage: go [-a] [-s server_certificate_arn] environment_name"
 
 die () {
     echo >&2 "$@"
@@ -13,12 +13,16 @@ config_s3_terraform()
     terraform remote config -backend=s3 -backend-config="bucket=${1}_${2}_terraform_state" -backend-config="key=network/terraform.tfstate" -backend-config="region=us-east-1"
 }
 
+SSL_CERT_ARN=`aws iam get-server-certificate --server-certificate-name terraform-gocd-elb --query 'ServerCertificate.ServerCertificateMetadata.{Arn:Arn}' --output text 2> /dev/null`
 # Get command line args
 OPTINT=1
-while getopts ":a" opt; do
+while getopts ":as:" opt; do
     case $opt in
 	a)
 	    CREATEAMI=0
+	    ;;
+	s)
+	    SSL_CERT_ARN=OPTARG
 	    ;;
 	\?) die $USAGE
 	    ;;
@@ -53,4 +57,17 @@ echo $AMI_NAME
 
 #Create Concourse environment in AWS
 config_s3_terraform $ENVIRONMENT_NAME "gocd"
-terraform apply -var "ami_name=$AMI_NAME" -var "env_name=${ENVIRONMENT_NAME}" $ROOT_DIR/terraform/gocd
+terraform apply -var "ami_name=$AMI_NAME" -var "env_name=${ENVIRONMENT_NAME}" $ROOT_DIR/terraform/gocd || die "Terraform failed"
+ELB_DNS_NAME=`terraform output elb_dns_name`
+
+#Create SSL cert if not provided
+if [[ -z $SSL_CERT_ARN ]]; then
+    cd $ROOT_DIR
+    openssl genrsa -out terraform-gocd-elb-pk.pem 2048
+    openssl req -sha256 -new -key terraform-gocd-elb-pk.pem -out terraform-gocd-elb.pem -subj "/CN=${ELB_DNS_NAME}"
+    openssl x509 -req -days 365 -in terraform-gocd-elb.pem -signkey terraform-gocd-elb-pk.pem -out terraform-gocd-elb-cert.pem
+    SSL_CERT_ARN=`aws iam upload-server-certificate --server-certificate-name terraform-gocd-elb --certificate-body file://${ROOT_DIR}/terraform-gocd-elb-cert.pem --private-key file://${ROOT_DIR}/terraform-gocd-elb-pk.pem --query 'ServerCertificateMetadata.{Arn:Arn}' --output text`
+    sleep 5 #AWS needs to have a little think
+fi
+aws elb create-load-balancer-listeners --load-balancer-name terraform-gocd-elb --listeners Protocol=HTTPS,LoadBalancerPort=443,InstanceProtocol=HTTP,InstancePort=8153,SSLCertificateId=${SSL_CERT_ARN}
+echo "Go is listening at https://${ELB_DNS_NAME}/"
