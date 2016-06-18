@@ -11,4 +11,25 @@
       </admins>
     </security>
   </server>
+  <pipelines group="bootstrap">
+    <authorization>
+      <view>
+        <user>raktabija</user>
+      </view>
+    </authorization>
+    <pipeline name="gocd">
+      <materials>
+        <git url="https://github.com/18F/raktabija.git"/>
+      </materials>
+      <stage name="bootstrap">
+        <jobs>
+          <job name="exec">
+            <tasks>
+              <exec command="/bin/bash" args="scripts/init_go" />
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+  </pipelines>
 </cruise>

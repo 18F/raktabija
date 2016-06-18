@@ -13,6 +13,8 @@ config_s3_terraform()
     terraform remote config -backend=s3 -backend-config="bucket=${1}_${2}_terraform_state" -backend-config="key=network/terraform.tfstate" -backend-config="region=us-east-1"
 }
 
+# See if there's already an SSL cert uploaded for Go
+
 SSL_CERT_ARN=`aws iam get-server-certificate --server-certificate-name terraform-gocd-elb --query 'ServerCertificate.ServerCertificateMetadata.{Arn:Arn}' --output text 2> /dev/null`
 # Get command line args
 OPTINT=1
@@ -47,11 +49,11 @@ AMI_NAME=`aws ec2 describe-images --owners self --filters Name=tag:Environment,V
 if [[ -z ${AMI_NAME+x} || $CREATEAMI ]]; then
     export LC_CTYPE=C
     GOCD_PASSWORD=$(tr -cd "[:alnum:]" < /dev/urandom | fold -w30 | head -n1)
-    echo "Credentials for Go: username raktabija, password ${GOCD_PASSWORD}"
     cd $ROOT_DIR/packer
     packer build -machine-readable -var "vpc_id=${PACKER_VPC}" -var "subnet_id=${PACKER_SUBNET}" -var "env_name=${ENVIRONMENT_NAME}" -var "gocd_password=${GOCD_PASSWORD}" bootstrap_concourse.json | tee build.log
     [[ ${PIPESTATUS[0]} -eq 0 ]] || die "Packer failed, exiting"
     AMI_NAME=`grep 'artifact,0,id' build.log | cut -d, -f6 | cut -d: -f2`
+    echo "Credentials for Go: username raktabija, password ${GOCD_PASSWORD}"
 fi
 echo $AMI_NAME
 
