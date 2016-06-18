@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-USAGE="Usage: go [-a] [-s server_certificate_arn] environment_name"
+USAGE="Usage: go [-a] [-s server_certificate_arn] [-n notifications_email_address] environment_name"
 
 die () {
     echo >&2 "$@"
@@ -10,6 +10,7 @@ config_s3_terraform()
 {
     aws s3 mb s3://$1_$2_terraform_state
     cd $ROOT_DIR/terraform/$2
+    rm -rf .terraform
     terraform remote config -backend=s3 -backend-config="bucket=${1}_${2}_terraform_state" -backend-config="key=network/terraform.tfstate" -backend-config="region=us-east-1"
 }
 
@@ -18,13 +19,16 @@ config_s3_terraform()
 SSL_CERT_ARN=`aws iam get-server-certificate --server-certificate-name terraform-gocd-elb --query 'ServerCertificate.ServerCertificateMetadata.{Arn:Arn}' --output text 2> /dev/null`
 # Get command line args
 OPTINT=1
-while getopts ":as:" opt; do
+while getopts ":as:n:" opt; do
     case $opt in
 	a)
 	    CREATEAMI=0
 	    ;;
 	s)
-	    SSL_CERT_ARN=OPTARG
+	    SSL_CERT_ARN=$OPTARG
+	    ;;
+	n)
+	    NOTIFICATIONS_EMAIL=$OPTARG
 	    ;;
 	\?) die $USAGE
 	    ;;
@@ -46,7 +50,7 @@ PACKER_VPC=`terraform output packer_vpc`
 
 #Create AMI for Concourse box
 AMI_NAME=`aws ec2 describe-images --owners self --filters Name=tag:Environment,Values=${ENVIRONMENT_NAME} Name=tag:Creator,Values=packer --query 'Images[*].{DATE:CreationDate,ID:ImageId}' --output text | sort -r | cut -f 2 | head -n1`
-if [[ -z ${AMI_NAME+x} || $CREATEAMI ]]; then
+if [[ -z $AMI_NAME || $CREATEAMI ]]; then
     export LC_CTYPE=C
     GOCD_PASSWORD=$(tr -cd "[:alnum:]" < /dev/urandom | fold -w30 | head -n1)
     cd $ROOT_DIR/packer
@@ -61,6 +65,12 @@ echo $AMI_NAME
 config_s3_terraform $ENVIRONMENT_NAME "gocd"
 terraform apply -var "ami_name=$AMI_NAME" -var "env_name=${ENVIRONMENT_NAME}" $ROOT_DIR/terraform/gocd || die "Terraform failed"
 ELB_DNS_NAME=`terraform output elb_dns_name`
+SNS_TOPIC_ARN=`terraform output sns_topic_name`
+
+#Set up email notifications
+if [[ -n ${NOTIFICATIONS_EMAIL+x} ]]; then
+    aws sns subscribe --topic-arn ${SNS_TOPIC_ARN} --protocol email --notification-endpoint "${NOTIFICATIONS_EMAIL}"
+fi
 
 #Create SSL cert if not provided
 if [[ -z $SSL_CERT_ARN ]]; then

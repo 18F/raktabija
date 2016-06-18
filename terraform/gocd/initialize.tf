@@ -245,3 +245,11 @@ resource "aws_autoscaling_group" "gocd_autoscale" {
     propagate_at_launch = true
   }
 }
+
+resource "aws_sns_topic" "raktabija_updates" {
+  name = "raktabija-updates-topic"
+}
+
+output "sns_topic_name" {
+    value="${aws_sns_topic.raktabija_updates.arn}"
+}

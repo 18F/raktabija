@@ -18,7 +18,8 @@ You'll need the following tools installed to bootstrap Raktabija:
 
 ## Installing Raktabija
 
-* Run `aws configure` and enter the credentials for your AWS account
+* Set the environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION`. The default AMI is configured assuming your default region is `us-east-1` - you'll need to change it if not.
+* Run `aws configure list` and ensure it is using the credentials from your environment, as set in the previous step. Bad things will happen if you have previously entered different credentials using `aws configure`.
 * Type `./go environment_name` at the shell.
 
 The `go` script uses Terraform to set up a VPC which will be used by Packer to build an AMI with Go, Terraform, Packer, and AWS CLI. It then runs Packer to create the AMI. Finally, Terraform sets up a VPC containing an autoscale group with a single instance of the AMI we just created. This instance has the Power User role in the AWS account, which gets picked up by Terraform.
