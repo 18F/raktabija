@@ -10,6 +10,10 @@ resource "aws_s3_bucket" "terraform_state_bucket" {
     versioning {
         enabled = true
     }
+    tags {
+        Name = "Project"
+	Value = "Raktabija"
+    }
 }
 
 output "packer_subnet" {
@@ -24,6 +28,7 @@ resource "aws_vpc" "packer" {
     cidr_block = "10.0.1.0/24"
     tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
     }
 }
 
@@ -31,6 +36,7 @@ resource "aws_internet_gateway" "packer_gw" {
     vpc_id = "${aws_vpc.packer.id}"
     tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
     }
 }
 
@@ -41,6 +47,7 @@ resource "aws_subnet" "packer_subnet" {
     map_public_ip_on_launch = true
     tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
     }
 }
 
@@ -52,6 +59,7 @@ resource "aws_route_table" "packer_route_table" {
     }
     tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
     }
 }
 

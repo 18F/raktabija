@@ -15,6 +15,7 @@ resource "aws_vpc" "gocd" {
     cidr_block = "10.0.0.0/24"
     tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
     }
 }
 
@@ -23,6 +24,10 @@ resource "aws_s3_bucket" "terraform_state_bucket" {
     acl = "private"
     versioning {
         enabled = true
+    }
+    tags {
+        Name = "Project"
+	Value = "Raktabija"
     }
 }
 
@@ -33,6 +38,7 @@ resource "aws_subnet" "gocd_subnet_1" {
     map_public_ip_on_launch = false
     tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
     }
 }
 
@@ -43,6 +49,7 @@ resource "aws_subnet" "gocd_subnet_2" {
     map_public_ip_on_launch = false
     tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
     }
 }
 
@@ -105,6 +112,7 @@ resource "aws_internet_gateway" "gocd_gw" {
   vpc_id = "${aws_vpc.gocd.id}"
   tags {
     Creator = "Terraform"
+    Project = "Raktabija"
   }
 }
 
@@ -116,6 +124,7 @@ resource "aws_route_table" "gocd_route_table" {
     }
     tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
     }
 }
 
@@ -150,6 +159,7 @@ resource "aws_security_group" "load_balancer" {
 
   tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
   }
 }
 
@@ -167,6 +177,7 @@ resource "aws_security_group" "gocd_instance" {
 
   tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
   }
 }
 
@@ -198,6 +209,7 @@ resource "aws_security_group" "allow_bastion" {
 
   tags {
     	 Creator = "Terraform"
+	 Project = "Raktabija"
   }
 }
 
@@ -229,6 +241,7 @@ resource "aws_elb" "gocd_elb" {
   connection_draining_timeout = 400
   tags {
     Creator = "Terraform"
+	 Project = "Raktabija"
   }
 }
 
@@ -249,6 +262,11 @@ resource "aws_autoscaling_group" "gocd_autoscale" {
   tag {
     key = "Creator"
     value = "Terraform"
+    propagate_at_launch = true
+  }
+  tag {
+    key = "Project"
+    value = "Raktabija"
     propagate_at_launch = true
   }
 }
