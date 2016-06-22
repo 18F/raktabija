@@ -87,4 +87,6 @@ for region in ec2_regions:
         if args.forreal:
             ec2client.terminate_instances(InstanceIds=instances_to_delete)
 
-print(output)
+sns_client = session.client('sns', 'us-east-1')
+topic_arn = 'arn:aws:sns:us-east-1:' + account_id + ':raktabija-updates-topic'
+sns_client.publish(TopicArn=topic_arn,Message=output,Subject='Deleting Resources on AWS account '+account_id)
