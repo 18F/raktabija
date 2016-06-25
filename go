@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-USAGE="Usage: go [-a] [-s server_certificate_arn] [-n notifications_email_address] environment_name"
+USAGE="Usage: go [-a] [-s server_certificate_arn] [-n notifications_email_address] environment_name chandika_url"
 
 die () {
     echo >&2 "$@"
@@ -36,9 +36,10 @@ while getopts ":as:n:" opt; do
 done
 shift $((OPTIND-1))
 
-if [[ -z ${ENVIRONMENT_NAME+x} ]]; then
-    [[ "$#" -eq 1 ]] || die $USAGE
+if [[ -z ${ENVIRONMENT_NAME+x} || -z ${CHANDIKA+x} ]]; then
+    [[ "$#" -eq 2 ]] || die $USAGE
     ENVIRONMENT_NAME=$1
+    CHANDIKA=$2
 fi
 ROOT_DIR=`pwd`
 
@@ -61,9 +62,9 @@ if [[ -z $AMI_NAME || $CREATEAMI ]]; then
 fi
 echo $AMI_NAME
 
-#Create Concourse environment in AWS
+#Create Go.CD environment in AWS
 config_s3_terraform $ENVIRONMENT_NAME "gocd"
-terraform apply -var "ami_name=$AMI_NAME" -var "env_name=${ENVIRONMENT_NAME}" $ROOT_DIR/terraform/gocd || die "Terraform failed"
+terraform apply -var "ami_name=$AMI_NAME" -var "env_name=${ENVIRONMENT_NAME}" -var "chandika=${CHANDIKA}" $ROOT_DIR/terraform/gocd || die "Terraform failed"
 ELB_DNS_NAME=`terraform output elb_dns_name`
 SNS_TOPIC_ARN=`terraform output sns_topic_name`
 
