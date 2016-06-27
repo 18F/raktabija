@@ -12,6 +12,7 @@ parser.add_argument('chandika', help="Chandika's hostname")
 parser.add_argument('--no-dry-run', dest='forreal', action='store_const', const=1, default=0, help='Actually delete non-greenlisted resources')
 args = parser.parse_args()
 
+# Get credentials from AWS
 aws_conn = http.client.HTTPConnection("169.254.169.254", timeout=2)
 
 try:
@@ -35,6 +36,7 @@ access_key = creds['AccessKeyId']
 secret_key = creds['SecretAccessKey']
 token = creds['Token']
 
+# Get account metadata from Chandika
 conn = http.client.HTTPSConnection(args.chandika)
 
 conn.request("GET", "/api/account.php?account_id=" + account_id)
@@ -44,12 +46,14 @@ if response.status != 200:
 
 tags = ['Raktabija']
 resources = []
-systems = json.loads(response.read().decode("utf-8"))
+account = json.loads(response.read().decode("utf-8"))
+account_name = account["Name"]
+systems = account["Services"]
 for system in systems:
     tags.append(system['Tag'])
     resources.extend(system['Resources'])
 
-output = 'Kali is running against AWS account ' + account_id + '.\n\n'
+output = 'Kali is running against AWS account ' + account_name + ' (' + account_id + ').\n\n'
 output = output + 'The following resources are safe: anything tagged with the name "Project" and the values "' + '","'.join(tags) + '", along with these named resources:\n\n'
 
 if len(resources) > 0:
@@ -89,4 +93,4 @@ for region in ec2_regions:
 
 sns_client = session.client('sns', 'us-east-1')
 topic_arn = 'arn:aws:sns:us-east-1:' + account_id + ':raktabija-updates-topic'
-sns_client.publish(TopicArn=topic_arn,Message=output,Subject='Deleting Resources on AWS account '+account_id)
+sns_client.publish(TopicArn=topic_arn,Message=output,Subject='Deleting Resources on AWS account '+account_name)
