@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+source /etc/environment
+if [[ $(date +%u) -eq 4 ]] ; then
+    python3 scripts/kali.py "${CHANDIKA}"
+fi
+
+if [[ $(date +%u) -eq 7 ]] ; then
+    python3 scripts/kali.py --no-dry-run "${CHANDIKA}"
+fi
