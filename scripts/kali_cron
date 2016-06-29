@@ -2,12 +2,12 @@
 source /etc/environment
 
 # ensure we're being triggered by the timer
-[ $GO_TRIGGER_USER -eq "timer" ] || exit 0
+[[ $GO_TRIGGER_USER == "timer" ]] || exit 0
 
-if [[ $(date +%u) -eq 4 ]] ; then
+if [[ $(date +%u) -eq 4 ]]; then
     python3 scripts/kali.py "${CHANDIKA}"
 fi
 
-if [[ $(date +%u) -eq 7 ]] ; then
+if [[ $(date +%u) -eq 7 ]]; then
     python3 scripts/kali.py --no-dry-run "${CHANDIKA}"
 fi
