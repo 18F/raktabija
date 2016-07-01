@@ -71,8 +71,8 @@ execute 'unzip_terraform' do
 end
 
 execute 'boto3' do
-  user 'ubuntu'
-  group 'ubuntu'
+  user 'go'
+  group 'go'
   action :run
   command 'pip3 install boto3'
 end
