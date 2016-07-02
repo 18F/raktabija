@@ -18,11 +18,22 @@ You'll need the following tools installed to bootstrap Raktabija:
 
 ## Installing Raktabija
 
+* Install [Chandika](https://github.com/18F/chandika) before you install Raktabija.
 * Set the environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION`. The default AMI is configured assuming your default region is `us-east-1` - you'll need to change it if not.
 * Run `aws configure list` and ensure it is using the credentials from your environment, as set in the previous step. Bad things will happen if you have previously entered different credentials using `aws configure`.
-* Type `./go environment_name` at the shell.
+* Type `./go -i email_address environment_name chandika_host` at the shell (see the Usage section below for the meaning of these arguments).
 
 The `go` script uses Terraform to set up a VPC which will be used by Packer to build an AMI with Go, Terraform, Packer, and AWS CLI. It then runs Packer to create the AMI. Finally, Terraform sets up a VPC containing an autoscale group with a single instance of the AMI we just created. This instance has the Power User role in the AWS account, which gets picked up by Terraform.
+
+### Usage
+
+Synopsis: `go [-a] [-i email_address] environment_name chandika_host`
+
+`environment_name` is a name unique to your environment. It is used (among other things) as a prefix to the S3 bucket name Terraform uses to keep your environment configuration in, so it needs to be unique. `chandika_host` is the hostname you installed Chandika at - Raktabija assumes it's avaiable over https, and that it is installed at the root of the given host.
+
+`email_address` is the address Raktabija will send notifications to for this environment. By default, Raktabija runs a script called Kali which destroys any AWS resources not recorded in Chandika. By default Raktabija runs Kali in dry run mode on Thursday night at 11pm, and for real on Sunday night at 11pm. Kali sends an email describing what has happened to the email address configured using this setting. It is recommended to create an email group (such as a Google group) to use for this purpose. This only needs to be configured once for the environment.
+
+`-a` bypasses creating an AMI, unless no AMI has been created by Raktabija for this AWS account. You need to create a new AMI if you want to update the Chef configuration for the box Go runs on. However it's not necessary to create a new AMI if you want to change Go's configuration.
 
 ## The origin of the name Raktabija
 

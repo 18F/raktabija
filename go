@@ -12,6 +12,7 @@ config_s3_terraform()
     cd $ROOT_DIR/terraform/$2
     rm -rf .terraform
     terraform remote config -backend=s3 -backend-config="bucket=${1}_${2}_terraform_state" -backend-config="key=network/terraform.tfstate" -backend-config="region=us-east-1"
+    [[ "$?" -eq 0 ]] || die "That environment name has already been used. Please choose another one."
 }
 
 # See if there's already an SSL cert uploaded for Go

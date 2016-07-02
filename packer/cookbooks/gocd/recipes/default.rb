@@ -7,7 +7,6 @@ package 'openjdk-8-jdk-headless'
 package 'unzip'
 package 'apache2-utils'
 package 'python3-pip'
-package 'awscli'
 
 db_password = shell_out("tr -cd '[:alnum:]' < /dev/urandom | fold -w30 | head -n1").stdout.strip
 terraform_binary_release = shell_out("curl https://www.terraform.io/downloads.html | grep 'linux_amd64' | head -n 1 | cut -d'\"' -f2").stdout.strip
@@ -71,10 +70,10 @@ execute 'unzip_terraform' do
 end
 
 execute 'boto3' do
-  user 'go'
-  group 'go'
+  user 'root'
+  group 'root'
   action :run
-  command 'pip3 install boto3'
+  command 'sudo -H pip3 install boto3 awscli'
 end
 
 #Delete IP & hostname before creating AMI
