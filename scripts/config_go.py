@@ -10,12 +10,14 @@ args = parser.parse_args()
 # get server id from existing config file
 tree = et.parse(args.config)
 root = tree.getroot()
+schemaVersion = root.get('schemaVersion')
 server = root.findall('server')[0]
 serverId = server.get('serverId')
 
 # get template
 tree = et.parse('packer/cookbooks/gocd/templates/cruise-config.xml.erb')
 root = tree.getroot()
+root.set('schemaVersion', schemaVersion)
 pipelines = root.findall('pipelines')[0]
 
 # set server id
