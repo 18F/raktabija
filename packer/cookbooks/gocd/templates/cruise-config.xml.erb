@@ -18,6 +18,7 @@
       </view>
     </authorization>
     <pipeline name="gocd">
+      <timer onlyOnChanges="false">0 0 21 ? * *</timer>
       <materials>
         <git url="https://github.com/18F/raktabija.git"/>
       </materials>
