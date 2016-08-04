@@ -9,7 +9,7 @@ In future, support will be added to run Chaos Monkey against the AWS account.
 
 ## Requirements
 
-You'll need the following tools installed to bootstrap Raktabija:
+You'll need the following tools installed on your local machine to run Raktabija:
 
 * [Terraform](https://www.terraform.io/)
 * [Packer](https://www.packer.io/)
@@ -21,13 +21,15 @@ You'll need the following tools installed to bootstrap Raktabija:
 * Install [Chandika](https://github.com/18F/chandika) before you install Raktabija.
 * Set the environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION`. The default AMI is configured assuming your default region is `us-east-1` - you'll need to change it if not.
 * Run `aws configure list` and ensure it is using the credentials from your environment, as set in the previous step. Bad things will happen if you have previously entered different credentials using `aws configure`.
-* Type `./go -i email_address environment_name chandika_host` at the shell (see the Usage section below for the meaning of these arguments).
+* Type `./go -n email_address environment_name chandika_host` at the shell (see the Usage section below for the meaning of these arguments).
 
-The `go` script uses Terraform to set up a VPC which will be used by Packer to build an AMI with Go, Terraform, Packer, and AWS CLI. It then runs Packer to create the AMI. Finally, Terraform sets up a VPC containing an autoscale group with a single instance of the AMI we just created. This instance has the Power User role in the AWS account, which gets picked up by Terraform.
+The `go` script uses Terraform to set up a VPC which will be used by Packer to build an AMI with Go, Terraform, Packer, and AWS CLI. It then runs Packer to create the AMI. Finally, Terraform sets up a VPC containing an autoscale group with a single instance of the AMI we just created. This instance has the Power User role in the AWS account, which gets picked up by Terraform running on the instance.
+
+Any further changes to the AWS account, including deployments, can then be made by adding Git repositories to Chandika. Raktabija reconfigures its Go instance daily, creating deployment pipelines for the Git repository listed in Chandika. By convention, it looks for a bash script called `deploy` in the root of a branch called `deploy`. This script should run Terraform to execute changes it wants to make to the AWS environment.
 
 ### Usage
 
-Synopsis: `go [-a] [-i email_address] environment_name chandika_host`
+Synopsis: `go [-a] [-n email_address] environment_name chandika_host`
 
 `environment_name` is a name unique to your environment. It is used (among other things) as a prefix to the S3 bucket name Terraform uses to keep your environment configuration in, so it needs to be unique. `chandika_host` is the hostname you installed Chandika at - Raktabija assumes it's avaiable over https, and that it is installed at the root of the given host.
 
