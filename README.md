@@ -3,7 +3,8 @@
 Raktabija bootstraps a new AWS account with a vpc and autoscaling group containing a host that includes:
 
 * A [gocd](https://www.go.cd/) instance that can run terraform. All further changes to the AWS environment can be made through this mechanism.
-* Scripts run on a schedule from gocd to delete any AWS resources not included in [Chandika](https://github.com/18F/chandika)
+* Kali, a script run on a schedule from gocd to delete any AWS resources not included in [Chandika](https://github.com/18F/chandika). Currently we only delete EC2 instances but this will be extended to delete other resources over time.
+* A script that configures gocd with a pipeline for each system listed in Chandika for that AWS account. Each pipeline pulls from the `deploy` branch of the Git repository listed in Chandika, and runs a bash script called `deploy` on every change to that branch.
 
 In future, support will be added to run Chaos Monkey against the AWS account.
 
@@ -22,6 +23,7 @@ You'll need the following tools installed on your local machine to run Raktabija
 * Set the environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION`. The default AMI is configured assuming your default region is `us-east-1` - you'll need to change it if not.
 * Run `aws configure list` and ensure it is using the credentials from your environment, as set in the previous step. Bad things will happen if you have previously entered different credentials using `aws configure`.
 * Type `./go -n email_address environment_name chandika_host` at the shell (see the Usage section below for the meaning of these arguments).
+* The first time you run Raktabija, look out for two important parameters the script will spit out. First, the credentials to log in to gocd. These will be on a line that begins `Credentials for Go:`. Second, the URL that gocd will be listening on, which will be the last thing the script prints to standard out.
 
 The `go` script uses Terraform to set up a VPC which will be used by Packer to build an AMI with Go, Terraform, Packer, and AWS CLI. It then runs Packer to create the AMI. Finally, Terraform sets up a VPC containing an autoscale group with a single instance of the AMI we just created. This instance has the Power User role in the AWS account, which gets picked up by Terraform running on the instance.
 
@@ -29,13 +31,15 @@ Any further changes to the AWS account, including deployments, can then be made 
 
 ### Usage
 
-Synopsis: `go [-a] [-n email_address] environment_name chandika_host`
+Synopsis: `go [-a] [-n email_address] [-s certificate_arn] environment_name chandika_host`
 
-`environment_name` is a name unique to your environment. It is used (among other things) as a prefix to the S3 bucket name Terraform uses to keep your environment configuration in, so it needs to be unique. `chandika_host` is the hostname you installed Chandika at - Raktabija assumes it's avaiable over https, and that it is installed at the root of the given host.
+`environment_name` is a name unique to your environment. It is used (among other things) as a prefix to the S3 bucket name Terraform uses to keep your environment configuration in, so it needs to be unique. `chandika_host` is the hostname you installed Chandika at - Raktabija assumes it's available over https, and that it is installed at the root of the given host.
 
-`email_address` is the address Raktabija will send notifications to for this environment. By default, Raktabija runs a script called Kali which destroys any AWS resources not recorded in Chandika. By default Raktabija runs Kali in dry run mode on Thursday night at 11pm, and for real on Sunday night at 11pm. Kali sends an email describing what has happened to the email address configured using this setting. It is recommended to create an email group (such as a Google group) to use for this purpose. This only needs to be configured once for the environment.
+`email_address` is the address Raktabija will send notifications to for this environment. By default, Raktabija runs a script called Kali which destroys any AWS resources not recorded in Chandika. Raktabija runs Kali in dry run mode on Thursday night at 11pm, and for real on Sunday night at 11pm. Kali sends an email describing what has happened to the email address configured using this setting. It is recommended to create an email group (such as a Google group) to use for this purpose. This only needs to be configured once for the environment.
 
 `-a` bypasses creating an AMI, unless no AMI has been created by Raktabija for this AWS account. You need to create a new AMI if you want to update the Chef configuration for the box Go runs on. However it's not necessary to create a new AMI if you want to change Go's configuration.
+
+`certificate_arn` is the ARN of an SSL certificate you have already uploaded to AWS. This SSL certificate is used by the ELB that sits in front of the Raktabija instance which hosts gocd. If you do not specify this option, Raktabija will create and upload a self-signed certificate to use for this purpose instead. You can find this self-signed certificate and the private key in the root directory of Raktabija after it has run.
 
 ## The origin of the name Raktabija
 
