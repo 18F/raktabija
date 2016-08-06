@@ -53,7 +53,7 @@ et.SubElement(tasks, 'exec', {'args':'scripts/kali_cron', 'command':'/bin/bash'}
 aws_creds = chandika_client.aws_credentials()
 account = chandika_client.chandika_metadata(aws_creds['account_id'], args.chandika)
 urls = {}
-for system in account['Services']:
+for system in account['Systems']:
     repository = system['Repository']
     if repository and repository.strip():
         urls[system["Name"]] = repository

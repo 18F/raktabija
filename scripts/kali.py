@@ -17,7 +17,7 @@ account = chandika_client.chandika_metadata(aws_creds['account_id'], args.chandi
 tags = ['Raktabija']
 resources = []
 account_name = account["Name"]
-systems = account["Services"]
+systems = account["Systems"]
 for system in systems:
     tags.append(system['Tag'])
     resources.extend(system['Resources'])
