@@ -6,6 +6,8 @@ Raktabija bootstraps a new AWS account with a vpc and autoscaling group containi
 * Kali, a script run on a schedule from gocd to delete any AWS resources not included in [Chandika](https://github.com/18F/chandika). Currently we only delete EC2 instances but this will be extended to delete other resources over time.
 * A script that configures gocd with a pipeline for each system listed in Chandika for that AWS account. Each pipeline pulls from the `deploy` branch of the Git repository listed in Chandika, and runs a bash script called `deploy` on every change to that branch.
 
+For more on the motivation behind Raktabija, read the blog post [Patterns for managing multi-tenant cloud environments](https://18f.gsa.gov/2016/08/10/patterns-for-managing-multi-tenant-cloud-environments/)
+
 In future, support will be added to run Chaos Monkey against the AWS account.
 
 ## Requirements
