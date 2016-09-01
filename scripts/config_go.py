@@ -17,6 +17,7 @@ def add_pipeline(pipelines, name, url):
 parser = argparse.ArgumentParser(description='Configure go.')
 parser.add_argument('config', help="Go's config file")
 parser.add_argument('chandika', help="Chandika's hostname")
+parser.add_argument('chandika_api_key', help="Chandika API key")
 args = parser.parse_args()
 
 # get go server id from existing config file
@@ -51,7 +52,7 @@ tasks = et.SubElement(job,'tasks')
 et.SubElement(tasks, 'exec', {'args':'scripts/kali_cron', 'command':'/bin/bash'})
 
 aws_creds = chandika_client.aws_credentials()
-account = chandika_client.chandika_metadata(aws_creds['account_id'], args.chandika)
+account = chandika_client.chandika_metadata(aws_creds['account_id'], args.chandika, args.chandika_api_key)
 urls = {}
 for system in account['Systems']:
     repository = system['Repository']

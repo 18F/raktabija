@@ -30,10 +30,10 @@ def aws_credentials():
     token = creds['Token']
     return {'account_id':account_id, 'access_key':access_key, 'secret_key':secret_key, 'token':token}
 
-def chandika_metadata(account_id, chandika_url):
+def chandika_metadata(account_id, chandika_url, chandika_api_key):
     conn = http.client.HTTPSConnection(chandika_url)
 
-    conn.request("GET", "/api/account.php?account_id=" + account_id)
+    conn.request("GET", "/api/account.php?account_id=" + account_id + "&api_key=" + chandika_api_key)
     response = conn.getresponse()
     if response.status != 200:
         sys.exit("Got response " + response.status + " from Chandika at host " + args.chandika)

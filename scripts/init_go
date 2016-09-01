@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 source /etc/environment
 
-python3 scripts/config_go.py "/etc/go/cruise-config.xml" "${CHANDIKA}"
+python3 scripts/config_go.py "/etc/go/cruise-config.xml" "${CHANDIKA}" "${CHANDIKA_API_KEY}"

@@ -5,9 +5,9 @@ source /etc/environment
 [[ $GO_TRIGGER_USER == "timer" ]] || exit 0
 
 if [[ $(date +%u) -eq 4 ]]; then
-    python3 scripts/kali.py "${CHANDIKA}"
+    python3 scripts/kali.py "${CHANDIKA}" "${CHANDIKA_API_KEY}"
 fi
 
 if [[ $(date +%u) -eq 7 ]]; then
-    python3 scripts/kali.py --no-dry-run "${CHANDIKA}"
+    python3 scripts/kali.py --no-dry-run "${CHANDIKA}" "${CHANDIKA_API_KEY}"
 fi

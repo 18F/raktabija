@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-USAGE="Usage: go [-a] [-s server_certificate_arn] [-n notifications_email_address] environment_name chandika_url"
+USAGE="Usage: go [-a] [-s server_certificate_arn] [-n notifications_email_address] environment_name chandika_url chandika_api_key"
 
 die () {
     echo >&2 "$@"
@@ -23,7 +23,7 @@ OPTINT=1
 while getopts ":as:n:" opt; do
     case $opt in
 	a)
-	    CREATEAMI=0
+	    SKIPAMI=1
 	    ;;
 	s)
 	    SSL_CERT_ARN=$OPTARG
@@ -38,9 +38,10 @@ done
 shift $((OPTIND-1))
 
 if [[ -z ${ENVIRONMENT_NAME+x} || -z ${CHANDIKA+x} ]]; then
-    [[ "$#" -eq 2 ]] || die $USAGE
+    [[ "$#" -eq 3 ]] || die $USAGE
     ENVIRONMENT_NAME=$1
     CHANDIKA=$2
+    CHANDIKA_API_KEY=$3
 fi
 ROOT_DIR=`pwd`
 
@@ -52,7 +53,7 @@ PACKER_VPC=`terraform output packer_vpc`
 
 #Create AMI for Concourse box
 AMI_NAME=`aws ec2 describe-images --owners self --filters Name=tag:Environment,Values=${ENVIRONMENT_NAME} Name=tag:Creator,Values=packer --query 'Images[*].{DATE:CreationDate,ID:ImageId}' --output text | sort -r | cut -f 2 | head -n1`
-if [[ -z $AMI_NAME || $CREATEAMI ]]; then
+if [[ -z $AMI_NAME || -z $SKIPAMI ]]; then
     export LC_CTYPE=C
     GOCD_PASSWORD=$(tr -cd "[:alnum:]" < /dev/urandom | fold -w30 | head -n1)
     cd $ROOT_DIR/packer
@@ -65,7 +66,7 @@ echo $AMI_NAME
 
 #Create Go.CD environment in AWS
 config_s3_terraform $ENVIRONMENT_NAME "gocd"
-terraform apply -var "ami_name=$AMI_NAME" -var "env_name=${ENVIRONMENT_NAME}" -var "chandika=${CHANDIKA}" $ROOT_DIR/terraform/gocd || die "Terraform failed"
+terraform apply -var "ami_name=$AMI_NAME" -var "env_name=${ENVIRONMENT_NAME}" -var "chandika=${CHANDIKA}" -var "chandika_api_key=${CHANDIKA_API_KEY}" $ROOT_DIR/terraform/gocd || die "Terraform failed"
 ELB_DNS_NAME=`terraform output elb_dns_name`
 SNS_TOPIC_ARN=`terraform output sns_topic_name`
 

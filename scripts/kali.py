@@ -7,6 +7,7 @@ import chandika_client
 
 parser = argparse.ArgumentParser(description='Kill AWS resources that have not been greenlisted in Chandika.')
 parser.add_argument('chandika', help="Chandika's hostname")
+parser.add_argument('chandika_api_key', help="Chandika API key")
 parser.add_argument('--no-dry-run', dest='forreal', action='store_const', const=1, default=0, help='Actually delete non-greenlisted resources')
 args = parser.parse_args()
 

@@ -6,6 +6,7 @@ variable "public_key" {}
 variable "ami_name" {}
 variable "env_name" {}
 variable "chandika" {}
+variable "chandika_api_key" {}
 
 resource "aws_key_pair" "raktabija" {
   key_name = "raktabija-key" 
@@ -106,6 +107,7 @@ resource "aws_launch_configuration" "gocd_autoscale_conf" {
     user_data =  <<EOF
 #!/usr/bin/env bash
 echo "CHANDIKA=${var.chandika}" >> /etc/environment
+echo "CHANDIKA_API_KEY=${var.chandika_api_key}" >> /etc/environment
 echo "$(curl http://169.254.169.254/latest/meta-data/public-ipv4) $(curl http://169.254.169.254/latest/meta-data/hostname | cut -d. -f1)" >> /etc/hosts
 EOF
 }
