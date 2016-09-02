@@ -3,6 +3,7 @@
 import argparse
 import xml.etree.ElementTree as et
 import chandika_client
+import os.path
 
 def add_pipeline(pipelines, name, url):
     pipeline = et.SubElement(pipelines, 'pipeline', {'name':name})
@@ -20,8 +21,9 @@ parser.add_argument('chandika', help="Chandika's hostname")
 parser.add_argument('chandika_api_key', help="Chandika API key")
 args = parser.parse_args()
 
-# get go server id from existing config file
-tree = et.parse(args.config)
+# get go server id from original config file
+original = '/etc/go/cruise-config.original.xml' if os.path.exists('/etc/go/cruise-config.original.xml') else args.config
+tree = et.parse(original)
 root = tree.getroot()
 schemaVersion = root.get('schemaVersion')
 server = root.findall('server')[0]
