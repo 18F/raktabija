@@ -21,17 +21,20 @@ end
 package 'go-server'
 package 'go-agent'
 
-file "/etc/go/cruise-config.original.xml" do
-  owner 'go'
-  mode 0600
-  content ::File.open("/etc/go/cruise-config.xml").read
-  action :create
-end
-
-template '/etc/go/cruise-config.xml' do
+template '/etc/go/cruise-config-template.xml' do
   mode 0600
   owner 'go'
   source 'cruise-config.xml.erb'
+end
+
+template '/etc/go/create-config' do
+  mode 0700
+  owner 'go'
+  source 'create-config.erb'
+end
+
+execute 'configure_go' do
+  command 'python3 /etc/go/create-config'
 end
 
 execute 'configure_env_name' do

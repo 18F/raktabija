@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+#  -*- coding: utf-8 -*-
+import xml.etree.ElementTree as et
+
+# get go server id from original config file
+tree = et.parse('/etc/go/cruise-config.xml')
+root = tree.getroot()
+schemaVersion = root.get('schemaVersion')
+server = root.findall('server')[0]
+serverId = server.get('serverId')
+
+# get template
+tree = et.parse('/etc/go/cruise-config-template.xml')
+root = tree.getroot()
+
+# set vars
+root.set('schemaVersion', schemaVersion)
+server = root.findall('server')[0]
+server.set('serverId', serverId)
+
+# write out config file
+tree.write('/etc/go/cruise-config.xml')
