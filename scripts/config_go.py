@@ -3,6 +3,7 @@
 import argparse
 import xml.etree.ElementTree as et
 import chandika_client
+import re
 
 def add_pipeline(pipelines, name, url):
     pipeline = et.SubElement(pipelines, 'pipeline', {'name':name})
@@ -57,7 +58,8 @@ urls = {}
 for system in account['Systems']:
     repository = system['Repository']
     if repository and repository.strip():
-        urls[system["Name"]] = repository
+        name = re.sub('[^A-Za-z0-9_]', '_', system['Name'])
+        urls[name] = repository
 
 for name in urls:
     add_pipeline(pipelines, name, urls[name])
