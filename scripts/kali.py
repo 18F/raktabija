@@ -13,7 +13,7 @@ args = parser.parse_args()
 
 aws_creds = chandika_client.aws_credentials()
 
-account = chandika_client.chandika_metadata(aws_creds['account_id'], args.chandika)
+account = chandika_client.chandika_metadata(aws_creds['account_id'], args.chandika, args.chandika_api_key)
 
 tags = ['Raktabija']
 resources = []
