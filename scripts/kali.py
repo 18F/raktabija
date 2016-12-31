@@ -9,9 +9,15 @@ parser = argparse.ArgumentParser(description='Kill AWS resources that have not b
 parser.add_argument('chandika', help="Chandika's hostname")
 parser.add_argument('chandika_api_key', help="Chandika API key")
 parser.add_argument('--no-dry-run', dest='forreal', action='store_const', const=1, default=0, help='Actually delete non-greenlisted resources')
+parser.add_argument('--aws-key', dest='aws_key', help='AWS Key')
+parser.add_argument('--aws-account', dest='aws_account', help='AWS Account Number')
+parser.add_argument('--aws-secret-key', dest='aws_secret_key', help='AWS Secret Key')
 args = parser.parse_args()
 
-aws_creds = chandika_client.aws_credentials()
+if args.aws_key and args.aws_secret_key and args.aws_account:
+    aws_creds = {'account_id' : args.aws_account, 'access_key' : args.aws_key, 'secret_key' : args.aws_secret_key, 'token' : None }
+else:
+    aws_creds = chandika_client.aws_credentials()
 
 account = chandika_client.chandika_metadata(aws_creds['account_id'], args.chandika, args.chandika_api_key)
 
@@ -51,10 +57,11 @@ for region in ec2_regions:
             if instance['InstanceId'] in resources:
                 break
             instance_tags = []
-            for tag in instance['Tags']:
-                if tag['Key'] == 'Project':
-                    instance_tags.append(tag['Value'])
-            if set(instance_tags).isdisjoint(set(tags)):
+            if 'Tags' in instance:
+                for tag in instance['Tags']:
+                    if tag['Key'] == 'Project':
+                        instance_tags.append(tag['Value'])
+            if len(instance_tags) == 0 or set(instance_tags).isdisjoint(set(tags)):
                 instances_to_delete.append(instance['InstanceId'])
     if instances_to_delete:
         output = output + '\n' + '\n'.join(instances_to_delete)
@@ -63,4 +70,7 @@ for region in ec2_regions:
 
 sns_client = session.client('sns', 'us-east-1')
 topic_arn = 'arn:aws:sns:us-east-1:' + aws_creds['account_id'] + ':raktabija-updates-topic'
-sns_client.publish(TopicArn=topic_arn,Message=output,Subject='Deleting Resources on AWS account '+account_name)
+if aws_creds['token']:
+    sns_client.publish(TopicArn=topic_arn,Message=output,Subject='Deleting Resources on AWS account '+account_name)
+else:
+    print(output)
