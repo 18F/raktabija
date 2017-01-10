@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#source /etc/environment
+source /etc/environment
 
 [[ -z "$GO_SERVER_URL" ]] || exit 0
 # ensure we're being triggered by the timer
@@ -10,5 +10,5 @@ if [[ $(date +%u) -eq 2 ]]; then
 fi
 
 if [[ $(date +%u) -eq 7 ]]; then
-    python3 scripts/kali.py --no-dry-run "${CHANDIKA}" "${CHANDIKA_API_KEY}"
+    scripts/kali.py --no-dry-run "${CHANDIKA}" "${CHANDIKA_API_KEY}"
 fi
