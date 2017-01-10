@@ -4,4 +4,4 @@ python:
 install:
   - pip3 install awscli boto3 --ignore-installed six
 script:
-  - scripts/kali_cron
+  - export PYTHONPATH=/usr/lib/python3/dist-packages:/usr/local/lib/python3.5/dist-packages && scripts/kali_cron
