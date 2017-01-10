@@ -6,7 +6,7 @@ import json
 import socket
 
 def aws_credentials():
-    if all (k in os.environ for k in ("AWS_ACCESS_KEY_ID","AWS_SECRET_ACCESS_KEY","AWS_ACCOUNT_ID"))
+    if all (k in os.environ for k in ("AWS_ACCESS_KEY_ID","AWS_SECRET_ACCESS_KEY","AWS_ACCOUNT_ID")):
         return {'account_id':os.environ['AWS_ACCOUNT_ID'],'access_key':os.environ['AWS_ACCESS_KEY_ID'],'secret_key':os.environ['AWS_SECRET_ACCESS_KEY'],'token':None} 
 
     aws_conn = http.client.HTTPConnection("169.254.169.254", timeout=2)
