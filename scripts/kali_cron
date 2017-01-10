@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source /etc/environment
+#source /etc/environment
 
 [[ -z "$GO_SERVER_URL" ]] || exit 0
 # ensure we're being triggered by the timer
