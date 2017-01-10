@@ -4,4 +4,4 @@ python:
 install:
   - pip3 install awscli boto3 --ignore-installed six
 script:
-  - scripts/kali_cron
+  - . scripts/kali_cron
