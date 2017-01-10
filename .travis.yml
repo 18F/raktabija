@@ -1,4 +1,4 @@
 langauge: python
 python: 3.5
-install: "sudo pip install awscli --ignore-installed six"
+install: "pip install awscli --ignore-installed six"
 script: scripts/kali_cron
