@@ -2,9 +2,9 @@
 source /etc/environment
 
 # ensure we're being triggered by the timer
-[[ $GO_TRIGGER_USER == "timer" ]] || exit 0
+#[[ $GO_TRIGGER_USER == "timer" ]] || [[ $TRAVIS_EVENT_TYPE == "cron" ]] || exit 0
 
-if [[ $(date +%u) -eq 4 ]]; then
+if [[ $(date +%u) -eq 2 ]]; then
     python3 scripts/kali.py "${CHANDIKA}" "${CHANDIKA_API_KEY}"
 fi
 
