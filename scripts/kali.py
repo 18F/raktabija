@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description='Kill AWS resources that have not b
 parser.add_argument('chandika', help="Chandika's hostname")
 parser.add_argument('chandika_api_key', help="Chandika API key")
 parser.add_argument('--no-dry-run', dest='forreal', action='store_const', const=1, default=0, help='Actually delete non-greenlisted resources')
+parser.add_argument('--no-sns', dest='console', action='store_const', const=1, default=0, help='Print output to console, not via SNS')
 parser.add_argument('--aws-key', dest='aws_key', help='AWS Key')
 parser.add_argument('--aws-account', dest='aws_account', help='AWS Account Number')
 parser.add_argument('--aws-secret-key', dest='aws_secret_key', help='AWS Secret Key')
@@ -70,7 +71,7 @@ for region in ec2_regions:
 
 sns_client = session.client('sns', 'us-east-1')
 topic_arn = 'arn:aws:sns:us-east-1:' + aws_creds['account_id'] + ':raktabija-updates-topic'
-if aws_creds['token']:
-    sns_client.publish(TopicArn=topic_arn,Message=output,Subject='Deleting Resources on AWS account '+account_name)
-else:
+if args.console:
     print(output)
+else:
+    sns_client.publish(TopicArn=topic_arn,Message=output,Subject='Deleting Resources on AWS account '+account_name)
