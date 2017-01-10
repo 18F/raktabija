@@ -6,7 +6,7 @@
 #[[ $GO_TRIGGER_USER == "timer" ]] || [[ $TRAVIS_EVENT_TYPE == "cron" ]] || exit 0
 
 if [[ $(date +%u) -eq 2 ]]; then
-    . scripts/kali.py "${CHANDIKA}" "${CHANDIKA_API_KEY}"
+    scripts/kali.py "${CHANDIKA}" "${CHANDIKA_API_KEY}"
 fi
 
 if [[ $(date +%u) -eq 7 ]]; then
