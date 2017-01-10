@@ -2,6 +2,6 @@ language: python
 python:
   - "3.5"
 install:
-  - pip3 install awscli boto3 --ignore-installed six
+  - pip3 install --user awscli boto3 --ignore-installed six
 script:
-  - export PYTHONPATH=/usr/lib/python3/dist-packages:/usr/local/lib/python3.5/dist-packages && scripts/kali_cron
+  - scripts/kali_cron
