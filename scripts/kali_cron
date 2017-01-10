@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 source /etc/environment
 
+[[ -z "$GO_SERVER_URL" ]] || exit 0
 # ensure we're being triggered by the timer
 #[[ $GO_TRIGGER_USER == "timer" ]] || [[ $TRAVIS_EVENT_TYPE == "cron" ]] || exit 0
 
