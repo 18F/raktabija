@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-#source /etc/environment
 
-[[ -z "$GO_SERVER_URL" ]] || exit 0
 # ensure we're being triggered by the timer
-#[[ $GO_TRIGGER_USER == "timer" ]] || [[ $TRAVIS_EVENT_TYPE == "cron" ]] || exit 0
+[[ $GO_TRIGGER_USER == "timer" ]] || [[ $TRAVIS_EVENT_TYPE == "cron" ]] || exit 0
 
-if [[ $(date +%u) -eq 2 ]]; then
+# Get chandika env vars if we're running via Go
+[[ -z "$GO_SERVER_URL" ]] || source /etc/environment
+
+if [[ $(date +%u) -eq 4 ]]; then
     scripts/kali.py "${CHANDIKA}" "${CHANDIKA_API_KEY}"
 fi
 
