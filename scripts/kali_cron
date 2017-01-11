@@ -3,13 +3,17 @@
 # ensure we're being triggered by the timer
 [[ $GO_TRIGGER_USER == "timer" ]] || [[ $TRAVIS_EVENT_TYPE == "cron" ]] || exit 0
 
+echo "A cron job has triggered Kali's bootstrap script. If it's a Thursday or a Sunday, Kali will now run"
+
 # Get chandika env vars if we're running via Go
 [[ -z "$GO_SERVER_URL" ]] || source /etc/environment
 
 if [[ $(date +%u) -eq 4 ]]; then
+    echo "It's Thursday, running Kali in dry run mode"
     scripts/kali.py "${CHANDIKA}" "${CHANDIKA_API_KEY}"
 fi
 
 if [[ $(date +%u) -eq 7 ]]; then
+    echo "It's Sunday, running Kali for real"
     scripts/kali.py --no-dry-run "${CHANDIKA}" "${CHANDIKA_API_KEY}"
 fi

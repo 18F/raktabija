@@ -63,7 +63,7 @@ If you only want Kali to run, you can have an existing CI server run the Kali sc
 
 You'll also need to set up an SNS topic in this AWS account with the name `raktabija-updates-topic`, and create a subscription which routes messages sent to this topic to an email group so that people using the account can get updates from Kali on what it plans to delete, or has deleted.
 
-Finally, you must [configure Travis to run daily using a [cron job](https://docs.travis-ci.com/user/cron-jobs/).
+Finally, you must [configure Travis to run daily using a cron job](https://docs.travis-ci.com/user/cron-jobs/).
 
 ## The origin of the name Raktabija
 
