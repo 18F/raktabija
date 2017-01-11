@@ -1,14 +1,14 @@
 # Raktabija
 
-Raktabija bootstraps a new AWS account with a vpc and autoscaling group containing a host that includes:
+Raktabija is a way to manage the deployment of systems to AWS, and to delete things that shouldn't be there. It does this by installing and configuring a CI server in your AWS account, which in turn gets a list of what should be deployed to that account from [Chandika](https://github.com/18F/chandika).
+
+Raktabija can be deployed in two ways. If you just want the functionality to delete stuff that shouldn't be there, see the section "Installing Kali Only" below. To obtain the full funcationality, Raktabija will bootstrap a new AWS account with a vpc and autoscaling group containing a host that includes:
 
 * A [gocd](https://www.go.cd/) instance that can run terraform. All further changes to the AWS environment can be made through this mechanism.
 * Kali, a script run on a schedule from gocd to delete any AWS resources not included in [Chandika](https://github.com/18F/chandika). Currently we only delete EC2 instances but this will be extended to delete other resources over time.
 * A script that configures gocd with a pipeline for each system listed in Chandika for that AWS account. Each pipeline pulls from the `deploy` branch of the Git repository listed in Chandika, and runs a bash script called `deploy` on every change to that branch.
 
 For more on the motivation behind Raktabija, read the blog post [Patterns for managing multi-tenant cloud environments](https://18f.gsa.gov/2016/08/10/patterns-for-managing-multi-tenant-cloud-environments/)
-
-In future, support will be added to run Chaos Monkey against the AWS account.
 
 ## Requirements
 
@@ -51,6 +51,19 @@ If you move Chandika to a different host or need to rotate the API key, this can
 It's only necessary to create a new AMI if you change the base gocd configuration (which is in `packer/cookbooks/gocd/templates/cruise-config.xml.erb`, or if you want to change the packages or Chef configuration of the Raktabija server.
 
 Changes to Kali, along with some other aspects of gocd's configuration, can be made without creating a new machine image, simply by making changes to the scripts in the `scripts` directory.
+
+### Installing Kali Only
+
+If you only want Kali to run, you can have an existing CI server run the Kali script on a schedule. This repository contains a `.travis.yml` configuration file which enables you to point Travis at a clone of the repository. You need to provide the Travis instance with a number of environment variables:
+
+* `CHANDIKA` - The hostname of your Chandika instance.
+* `CHANDIKA_API_KEY` - A valid API key from Chandika
+* `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` - the credentials to access the AWS account
+* `AWS_ACCOUNT_ID` - the AWS account number
+
+You'll also need to set up an SNS topic in this AWS account with the name `raktabija-updates-topic`, and create a subscription which routes messages sent to this topic to an email group so that people using the account can get updates from Kali on what it plans to delete, or has deleted.
+
+Finally, you must [configure Travis to run daily using a [cron job](https://docs.travis-ci.com/user/cron-jobs/).
 
 ## The origin of the name Raktabija
 
