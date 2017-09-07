@@ -1,0 +1,10 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: python:3.6
+
+    steps:
+      - checkout
+      - run: pip3 install awscli boto3 --ignore-installed six
+      - run: ./scripts/kali_cron
