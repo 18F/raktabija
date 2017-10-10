@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ensure we're being triggered by the timer
-[[ $GO_TRIGGER_USER == "timer" ]] || [[ $TRAVIS_EVENT_TYPE == "cron" ]] || exit 0
+[[ $CIRCLE_WORKFLOW_CONCURRENCY_MAP == "{}" ]] || [[ $TRAVIS_EVENT_TYPE == "cron" ]] || exit 0
 
 echo "A cron job has triggered Kali's bootstrap script. If it's a Thursday or a Sunday, Kali will now run"
 
