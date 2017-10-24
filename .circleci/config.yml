@@ -9,12 +9,14 @@ jobs:
       - run: pip3 install awscli boto3 --ignore-installed six
       - run: ./scripts/kali_cron
 workflows:
-  version: scheduled-workflows-mvp
+  version: 2
   nightly:
     triggers:
-      - type: scheduled
-        frequency: "0 42 3 * * ?"
-        branches:
-         - master
+      - schedule:
+          cron: "42 3 * * *"
+          filters:
+            branches:
+              only:
+                - master
     jobs:
       - build
